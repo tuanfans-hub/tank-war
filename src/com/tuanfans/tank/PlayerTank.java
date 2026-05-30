@@ -20,8 +20,8 @@ public class PlayerTank extends Tank{
         this.x = x;
         this.y = y;
         this.speed = 5;
-        this.size = 40;
         this.direction = dir;
+        this.group = Group.PLAYER;
         this.image = new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("images/GoodTank1.png"))).getImage();
     }
 
@@ -74,7 +74,7 @@ public class PlayerTank extends Tank{
         }
         if(isDownKey){
             direction = Direction.DOWN;
-            y=y< TankPanel.GAME_HEIGHT-size?y+speed:TankPanel.GAME_HEIGHT-size;
+            y=y< TankPanel.GAME_HEIGHT-Tank.SIZE?y+speed:TankPanel.GAME_HEIGHT-Tank.SIZE;
         }
         if(isLeftKey){
             direction = Direction.LEFT;
@@ -82,44 +82,14 @@ public class PlayerTank extends Tank{
         }
         if(isRightKey){
             direction = Direction.RIGHT;
-            x=x<TankPanel.GAME_WIDTH-size?x+speed:TankPanel.GAME_WIDTH-size;
+            x=x<TankPanel.GAME_WIDTH-Tank.SIZE?x+speed:TankPanel.GAME_WIDTH-Tank.SIZE;
         }
     }
 
-    private void shoot(){
-        Bullet b = switch(direction){
-            case Direction.UP->Bullet.createBullet(x+15,y,direction, Group.PLAYER);
-            case Direction.DOWN->Bullet.createBullet(x+15,y+size,direction, Group.PLAYER);
-            case Direction.LEFT->Bullet.createBullet(x,y+15,direction, Group.PLAYER);
-            case Direction.RIGHT->Bullet.createBullet(x+size,y+15,direction, Group.PLAYER);
-        };
+    @Override
+    void shoot(){
+        Bullet b = Bullet.createBullet(x+Tank.SIZE/2-Bullet.SIZE/2,y+Tank.SIZE/2-Bullet.SIZE/2,direction, Group.PLAYER);
         TankPanel.bullets.add(b);
     }
-
-//    @Override
-//    public void draw(Graphics2D g2) {
-//        switch(direction){
-//            case Direction.UP:
-//                g2.drawImage(image,x,y,size,size,null);
-//                break;
-//
-//            case Direction.DOWN:
-//                g2.rotate(Math.PI,x+ (double) size /2,y+ (double) size /2);
-//                g2.drawImage(image,x,y,size,size,null);
-//                break;
-//
-//            case Direction.LEFT:
-//                g2.rotate(-Math.PI/2,x+ (double) size /2,y+ (double) size /2);
-//                g2.drawImage(image,x,y,size,size,null);
-//                break;
-//
-//            case Direction.RIGHT:
-//                g2.rotate(Math.PI/2,x+ (double) size /2,y+ (double) size /2);
-//                g2.drawImage(image,x,y,size,size,null);
-//                break;
-//        }
-//        // 释放副本，恢复画笔状态。防止其他图形受该画笔状态变化的影响
-//        g2.dispose();
-//    }
 
 }

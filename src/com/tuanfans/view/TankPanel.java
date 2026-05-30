@@ -1,10 +1,14 @@
 package com.tuanfans.view;
 
 import com.tuanfans.Direction;
+import com.tuanfans.Group;
+import com.tuanfans.Level;
 import com.tuanfans.bullet.Bullet;
+import com.tuanfans.explode.Explode;
 import com.tuanfans.tank.EnemyTank;
 import com.tuanfans.tank.EnemyTankFactory;
 import com.tuanfans.tank.PlayerTank;
+import com.tuanfans.tank.Tank;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,15 +24,17 @@ import java.util.ArrayList;
 public class TankPanel extends JPanel implements Runnable {
     PlayerTank pt ;
     ArrayList<EnemyTank> enemyTanks;
+    ArrayList<Tank> tanks;
     public static final ArrayList<Bullet> bullets = new ArrayList<>();
+    public static final ArrayList<Explode> explodes = new ArrayList<>();
     Thread gameThread;
-
     public KeyListener keyHandler;
 
     public static final int GAME_WIDTH = 800;
     public static final int GAME_HEIGHT = 600;
     public static final int GAME_FPS = 60;
-
+    public static boolean isGameOver = false;
+    public static Level gameLevel = Level.HARD;
     public TankPanel(){
         this.setPreferredSize(new Dimension(GAME_WIDTH,GAME_HEIGHT));
         this.setBackground(Color.BLACK);
@@ -41,7 +47,9 @@ public class TankPanel extends JPanel implements Runnable {
         this.keyHandler = new KeyHandler();
         this.addKeyListener(keyHandler);
         this.pt = new PlayerTank(100,100, Direction.UP);
-        this.enemyTanks = EnemyTankFactory.initEnemyTanks(3);
+        this.enemyTanks = EnemyTankFactory.initEnemyTanks(gameLevel);
+        this.tanks = new ArrayList<>(enemyTanks);
+        this.tanks.add(pt);
     }
 
     public void startGameThread(){
@@ -55,22 +63,40 @@ public class TankPanel extends JPanel implements Runnable {
         Graphics2D g2 =  (Graphics2D) g;
         g2.setColor(Color.WHITE);
         pt.draw(g2);
+        for(Bullet bullet: bullets){
+            bullet.draw(g2);
+        }
         for(EnemyTank enemyTank: enemyTanks){
             enemyTank.draw(g2);
         }
-        for(Bullet bullet: bullets){
-            bullet.draw(g2);
+        for(int i=0;i<explodes.size();i++){
+            Explode explode = explodes.get(i);
+            if(explode.isLive()) explode.draw(g2);
+            else explodes.remove(explode);
         }
         g2.dispose();
     }
 
     private void setLocation(){
         pt.move();
-        for(EnemyTank enemyTank: enemyTanks){
-            enemyTank.move();
-        }
         for(int i=0;i<bullets.size();i++){
-            bullets.get(i).move(bullets);
+            // 检测子弹是否击中坦克
+            bullets.get(i).collision(tanks);
+            if(bullets.get(i).isLive()) bullets.get(i).move();
+            else bullets.remove(bullets.get(i));
+        }
+        for(int i=0;i<tanks.size();i++){
+            Tank tank = tanks.get(i);
+            if(tank.isLive()) tank.move();
+            else {
+                tanks.remove(tank);
+                if(tank.getGroup() == Group.ENEMY){
+                    enemyTanks.remove((EnemyTank) tank);
+                }else{
+                    isGameOver = true;
+                    System.out.println("游戏结束");
+                }
+            }
         }
     }
 
@@ -98,8 +124,6 @@ public class TankPanel extends JPanel implements Runnable {
     }
 
     public class KeyHandler extends KeyAdapter {
-
-
         @Override
         public void keyPressed(KeyEvent e) {
             pt.keyPressed(e);

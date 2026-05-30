@@ -1,5 +1,7 @@
 package com.tuanfans.tank;
 
+import com.tuanfans.Level;
+
 import java.util.ArrayList;
 
 /**
@@ -7,10 +9,11 @@ import java.util.ArrayList;
  * @date 2026/5/29
  */
 public class EnemyTankFactory {
-    public static ArrayList<EnemyTank> initEnemyTanks(int count){
+    private EnemyTankFactory(){}
+    public static ArrayList<EnemyTank> initEnemyTanks(Level level){
         ArrayList<EnemyTank> enemyTanks = new ArrayList<>();
-        while(enemyTanks.size()<count){
-            enemyTanks.add(new EnemyTank());
+        while(enemyTanks.size()<level.getCount()){
+            enemyTanks.add(EnemyTank.createEnemyTank());
         }
         return enemyTanks;
     }
