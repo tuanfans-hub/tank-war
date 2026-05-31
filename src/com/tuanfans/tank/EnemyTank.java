@@ -2,7 +2,6 @@ package com.tuanfans.tank;
 
 import com.tuanfans.Direction;
 import com.tuanfans.Group;
-import com.tuanfans.Level;
 import com.tuanfans.bullet.Bullet;
 import com.tuanfans.view.TankPanel;
 

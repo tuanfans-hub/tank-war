@@ -1,0 +1,23 @@
+package com.tuanfans.strategy.shoot;
+
+import com.tuanfans.Direction;
+import com.tuanfans.Group;
+import com.tuanfans.bullet.Bullet;
+import com.tuanfans.tank.PlayerTank;
+import com.tuanfans.tank.Tank;
+import com.tuanfans.view.TankPanel;
+
+/**
+ * @author TuanFans
+ * @date 2026/5/31
+ */
+public class FourDirShootStrategy implements ShootStrategy{
+    @Override
+    public void shoot(PlayerTank pt) {
+        Direction[] dirs = Direction.values();
+        for(Direction dir:dirs){
+            Bullet b = Bullet.createBullet(pt.getX()+ Tank.SIZE/2-Bullet.SIZE/2,pt.getY()+Tank.SIZE/2-Bullet.SIZE/2,dir, Group.PLAYER);
+            TankPanel.bullets.add(b);
+        }
+    }
+}

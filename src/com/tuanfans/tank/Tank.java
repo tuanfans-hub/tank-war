@@ -11,7 +11,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
-import java.util.Objects;
 
 /**
  * @author TuanFans
@@ -43,6 +42,10 @@ public abstract class Tank {
 
     public void setLive(boolean live){
         this.live = live;
+    }
+
+    public Direction getDirection(){
+        return direction;
     }
 
     public abstract void move();

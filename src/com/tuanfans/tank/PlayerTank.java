@@ -1,13 +1,17 @@
 package com.tuanfans.tank;
 
 
+import com.tuanfans.ConfigManager;
 import com.tuanfans.Direction;
 import com.tuanfans.Group;
 import com.tuanfans.bullet.Bullet;
+import com.tuanfans.strategy.shoot.DefaultShootStrategy;
+import com.tuanfans.strategy.shoot.ShootStrategy;
 import com.tuanfans.view.TankPanel;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
 /**
@@ -16,6 +20,7 @@ import java.util.Objects;
  */
 public class PlayerTank extends Tank{
     private boolean isUpKey, isDownKey, isLeftKey, isRightKey;
+    private ShootStrategy shootStrategy;
     public PlayerTank(int x, int y, Direction dir){
         this.x = x;
         this.y = y;
@@ -23,6 +28,8 @@ public class PlayerTank extends Tank{
         this.direction = dir;
         this.group = Group.PLAYER;
         this.image = new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("images/GoodTank1.png"))).getImage();
+
+        initShootStrategy();
     }
 
     public void keyPressed(KeyEvent e){
@@ -88,8 +95,16 @@ public class PlayerTank extends Tank{
 
     @Override
     void shoot(){
-        Bullet b = Bullet.createBullet(x+Tank.SIZE/2-Bullet.SIZE/2,y+Tank.SIZE/2-Bullet.SIZE/2,direction, Group.PLAYER);
-        TankPanel.bullets.add(b);
+        shootStrategy.shoot(this);
     }
 
+    private void initShootStrategy(){
+        try {
+            Class<?> clazz = Class.forName("com.tuanfans.strategy.shoot." + ConfigManager.get("shoot.strategy"));
+            this.shootStrategy = (ShootStrategy) clazz.getDeclaredConstructor().newInstance();
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException |
+                 IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
 }
