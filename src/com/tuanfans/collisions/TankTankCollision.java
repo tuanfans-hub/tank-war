@@ -2,7 +2,6 @@ package com.tuanfans.collisions;
 
 import com.tuanfans.AbstractGameObject;
 import com.tuanfans.tank.Tank;
-import com.tuanfans.wall.Wall;
 
 /**
  * @author TuanFans
