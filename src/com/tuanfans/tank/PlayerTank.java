@@ -11,6 +11,7 @@ import com.tuanfans.view.TankPanel;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
+import java.awt.geom.Rectangle2D;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
@@ -28,7 +29,7 @@ public class PlayerTank extends Tank{
         this.direction = dir;
         this.group = Group.PLAYER;
         this.image = new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("images/GoodTank1.png"))).getImage();
-
+        this.rect = new Rectangle2D.Double(x, y, Tank.SIZE, Tank.SIZE);
         initShootStrategy();
     }
 
@@ -75,6 +76,8 @@ public class PlayerTank extends Tank{
 
     @Override
     public void move() {
+        this.oldX = x;
+        this.oldY = y;
         if(isUpKey){
             direction = Direction.UP;
             y=y>0?y-speed:0;
@@ -91,6 +94,8 @@ public class PlayerTank extends Tank{
             direction = Direction.RIGHT;
             x=x<TankPanel.GAME_WIDTH-Tank.SIZE?x+speed:TankPanel.GAME_WIDTH-Tank.SIZE;
         }
+        rect.x = x;
+        rect.y = y;
     }
 
     @Override

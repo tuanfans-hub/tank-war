@@ -1,36 +1,37 @@
 package com.tuanfans.bullet;
 
+import com.tuanfans.AbstractGameObject;
 import com.tuanfans.Direction;
 import com.tuanfans.Group;
+import com.tuanfans.Moveable;
 import com.tuanfans.tank.Tank;
 import com.tuanfans.view.TankPanel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
 import java.util.Objects;
 
 /**
  * @author TuanFans
  * @date 2026/5/29
  */
-public class Bullet {
+public class Bullet extends AbstractGameObject implements Moveable {
     int x,y,speed;
     public static final int SIZE = 10;
     Direction direction;
     Image image;
     Group group;
-    private boolean live = true;
+    private Rectangle2D.Double rect;
 
     private Bullet(){}
 
-    public void setLive(boolean live){
-        this.live = live;
+    public Rectangle2D.Double getRect(){
+        return rect;
     }
 
-    public boolean isLive(){
-        return this.live;
+    public Group getGroup(){
+        return group;
     }
     public static Bullet createBullet(int x, int y, Direction dir, Group group){
         Bullet bullet = new Bullet();
@@ -40,9 +41,11 @@ public class Bullet {
         bullet.direction = dir;
         bullet.image = new ImageIcon(Objects.requireNonNull(Bullet.class.getClassLoader().getResource("images/bulletU.png"))).getImage();
         bullet.group = group;
+        bullet.rect = new Rectangle2D.Double(x, y, Bullet.SIZE, Bullet.SIZE);
         return bullet;
     }
 
+    @Override
     public void move(){
         switch (direction){
             case Direction.UP:
@@ -58,21 +61,20 @@ public class Bullet {
                 x+=speed;
                 break;
         }
+        rect.x = x;
+        rect.y = y;
         checkBullet();
     }
 
     // 碰撞检测：检测子弹是否与坦克相撞
-    public void collision(ArrayList<Tank> tanks){
+    public void collision(Tank tank){
         Rectangle2D.Double bRect = new Rectangle2D.Double(x, y, Bullet.SIZE, Bullet.SIZE);
-        for (Tank tank : tanks) {
-            Rectangle2D.Double tRect = new Rectangle2D.Double(tank.getX(), tank.getY(), Tank.SIZE, Tank.SIZE);
-            if (bRect.intersects(tRect)) {
-                if (tank.getGroup() != this.group) {
-                    tank.setLive(false);
-                    this.live = false;
-                    tank.explode();
-                    break;
-                }
+        Rectangle2D.Double tRect = new Rectangle2D.Double(tank.getX(), tank.getY(), Tank.SIZE, Tank.SIZE);
+        if (bRect.intersects(tRect)) {
+            if (tank.getGroup() != this.group) {
+                tank.setLive(false);
+                this.setLive(false);
+                tank.explode();
             }
         }
     }
@@ -80,11 +82,17 @@ public class Bullet {
     // 检测子弹是否超出可视范围
     private void checkBullet(){
         if(x<=0||x>=TankPanel.GAME_WIDTH||y<=0||y>=TankPanel.GAME_HEIGHT){
-            this.live = false;
+            this.setLive(false);
         }
     }
 
+    @Override
     public void draw(Graphics2D g2){
+        if(!this.isLive()) {
+            TankPanel.getInstance().remove(this);
+            return;
+        }
+        // 创建副本：创建副本，避免对原始对象进行修改
         Graphics2D g2d = (Graphics2D) g2.create();
         switch(direction){
             case Direction.UP:

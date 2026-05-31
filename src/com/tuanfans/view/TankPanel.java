@@ -1,20 +1,19 @@
 package com.tuanfans.view;
 
-import com.tuanfans.Direction;
-import com.tuanfans.Group;
-import com.tuanfans.Level;
-import com.tuanfans.bullet.Bullet;
-import com.tuanfans.explode.Explode;
-import com.tuanfans.tank.EnemyTank;
+import com.tuanfans.*;
+import com.tuanfans.collisions.BulletTankCollision;
+import com.tuanfans.collisions.Collision;
+import com.tuanfans.collisions.CollisionChain;
 import com.tuanfans.tank.EnemyTankFactory;
 import com.tuanfans.tank.PlayerTank;
-import com.tuanfans.tank.Tank;
+import com.tuanfans.wall.Wall;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 /**
@@ -22,11 +21,14 @@ import java.util.ArrayList;
  * @date 2026/5/29
  */
 public class TankPanel extends JPanel implements Runnable {
+    private static TankPanel INSTANCE;
     final PlayerTank pt ;
-    final ArrayList<EnemyTank> enemyTanks;
-    final ArrayList<Tank> tanks;
-    public static final ArrayList<Bullet> bullets = new ArrayList<>();
-    public static final ArrayList<Explode> explodes = new ArrayList<>();
+//    final ArrayList<EnemyTank> enemyTanks;
+//    final ArrayList<Tank> tanks;
+//    public static final ArrayList<Bullet> bullets = new ArrayList<>();
+//    public static final ArrayList<Explode> explodes = new ArrayList<>();
+    final ArrayList<AbstractGameObject> gameObjects;
+    final CollisionChain collisionChain;
     Thread gameThread;
     public KeyListener keyHandler;
 
@@ -34,8 +36,8 @@ public class TankPanel extends JPanel implements Runnable {
     public static final int GAME_HEIGHT = 600;
     public static final int GAME_FPS = 60;
     public static boolean isGameOver = false;
-    public static Level gameLevel = Level.EASY;
-    public TankPanel(){
+    public static Level gameLevel = Level.CUSTOM;
+    private TankPanel(){
         this.setPreferredSize(new Dimension(GAME_WIDTH,GAME_HEIGHT));
         this.setBackground(Color.BLACK);
         // 启用双缓冲技术，将图形先绘制到内存缓冲区，再一次性显示到屏幕，有效消除画面闪烁现象，提升游戏渲染的流畅度和视觉体验。
@@ -47,9 +49,27 @@ public class TankPanel extends JPanel implements Runnable {
         this.keyHandler = new KeyHandler();
         this.addKeyListener(keyHandler);
         this.pt = new PlayerTank(100,100, Direction.UP);
-        this.enemyTanks = EnemyTankFactory.initEnemyTanks(gameLevel);
-        this.tanks = new ArrayList<>(enemyTanks);
-        this.tanks.add(pt);
+//        this.enemyTanks = EnemyTankFactory.initEnemyTanks(gameLevel);
+//        this.tanks = new ArrayList<>(enemyTanks);
+//        this.tanks.add(pt);
+        this.gameObjects = new ArrayList<>(EnemyTankFactory.initEnemyTanks(gameLevel));
+        this.add(new Wall(300,200,300,50));
+        this.collisionChain = new CollisionChain();
+    }
+
+    public static TankPanel getInstance(){
+        if(INSTANCE==null){
+            INSTANCE = new TankPanel();
+        }
+        return INSTANCE;
+    }
+
+    public void add(AbstractGameObject gameObject){
+        gameObjects.add(gameObject);
+    }
+
+    public void remove(AbstractGameObject gameObject){
+        gameObjects.remove(gameObject);
     }
 
     public void startGameThread(){
@@ -62,22 +82,35 @@ public class TankPanel extends JPanel implements Runnable {
         super.paintComponent(g);
         Graphics2D g2 =  (Graphics2D) g;
         g2.setColor(Color.WHITE);
+        g2.drawString("gameObjects："+gameObjects.size(),10,20);
         pt.draw(g2);
-        synchronized(bullets){
-            for(int i=bullets.size()-1;i>=0;i--){
-                bullets.get(i).draw(g2);
-            }
-        }
-        synchronized(enemyTanks){
-            for(int i=enemyTanks.size()-1;i>=0;i--){
-                enemyTanks.get(i).draw(g2);
-            }
-        }
-        synchronized(explodes){
-            for(int i=explodes.size()-1;i>=0;i--){
-                Explode explode = explodes.get(i);
-                if(explode.isLive()) explode.draw(g2);
-                else explodes.remove(i);
+//        synchronized(bullets){
+//            for(int i=bullets.size()-1;i>=0;i--){
+//                bullets.get(i).draw(g2);
+//            }
+//        }
+//        synchronized(enemyTanks){
+//            for(int i=enemyTanks.size()-1;i>=0;i--){
+//                enemyTanks.get(i).draw(g2);
+//            }
+//        }
+//        synchronized(explodes){
+//            for(int i=explodes.size()-1;i>=0;i--){
+//                Explode explode = explodes.get(i);
+//                if(explode.isLive()) explode.draw(g2);
+//                else explodes.remove(i);
+//            }
+//        }
+        synchronized(gameObjects){
+            for(int i=gameObjects.size()-1;i>=0;i--){
+                AbstractGameObject obj1 = gameObjects.get(i);
+                for(int j=i-1;j>=0;j--){
+                    if(!obj1.isLive()) break;
+                    AbstractGameObject obj2 = gameObjects.get(j);
+                    // 碰撞检测
+                    collisionChain.collide(obj1,obj2);
+                }
+                obj1.draw(g2);
             }
         }
         g2.dispose();
@@ -85,26 +118,33 @@ public class TankPanel extends JPanel implements Runnable {
 
     private void setLocation(){
         pt.move();
-        synchronized(bullets){
-            for(int i=bullets.size()-1;i>=0;i--){
-                // 检测子弹是否击中坦克
-                bullets.get(i).collision(tanks);
-                if(bullets.get(i).isLive()) bullets.get(i).move();
-                else bullets.remove(i);
-            }
-        }
-        synchronized(tanks){
-            for(int i=tanks.size()-1;i>=0;i--){
-                Tank tank = tanks.get(i);
-                if(tank.isLive()) tank.move();
-                else {
-                    tanks.remove(i);
-                    if(tank.getGroup() == Group.ENEMY){
-                        enemyTanks.remove(i);
-                    }else{
-                        isGameOver = true;
-                        System.out.println("游戏结束");
-                    }
+//        synchronized(bullets){
+//            for(int i=bullets.size()-1;i>=0;i--){
+//                // 检测子弹是否击中坦克
+//                bullets.get(i).collision(tanks);
+//                if(bullets.get(i).isLive()) bullets.get(i).move();
+//                else bullets.remove(i);
+//            }
+//        }
+//        synchronized(tanks){
+//            for(int i=tanks.size()-1;i>=0;i--){
+//                Tank tank = tanks.get(i);
+//                if(tank.isLive()) tank.move();
+//                else {
+//                    tanks.remove(i);
+//                    if(tank.getGroup() == Group.ENEMY){
+//                        enemyTanks.remove(i);
+//                    }else{
+//                        isGameOver = true;
+//                        System.out.println("游戏结束");
+//                    }
+//                }
+//            }
+//        }
+        synchronized(gameObjects){
+            for(int i=gameObjects.size()-1;i>=0;i--){
+                if(gameObjects.get(i) instanceof Moveable moveObj){
+                    moveObj.move();
                 }
             }
         }

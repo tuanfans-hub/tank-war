@@ -6,6 +6,7 @@ import com.tuanfans.bullet.Bullet;
 import com.tuanfans.view.TankPanel;
 
 import javax.swing.*;
+import java.awt.geom.Rectangle2D;
 import java.util.Objects;
 
 /**
@@ -20,6 +21,7 @@ public class EnemyTank extends Tank{
         this.direction = Direction.values()[(int)(Math.random()*4)];
         this.group = Group.ENEMY;
         this.image = new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("images/BadTank1.png"))).getImage();
+        this.rect = new Rectangle2D.Double(x,y,SIZE,SIZE);
     }
 
     public static EnemyTank createEnemyTank(){
@@ -28,6 +30,8 @@ public class EnemyTank extends Tank{
 
     @Override
     public void move() {
+        this.oldX = x;
+        this.oldY = y;
         if(direction == Direction.UP){
             y=y>0?y-speed:0;
         }
@@ -40,6 +44,8 @@ public class EnemyTank extends Tank{
         if(direction == Direction.RIGHT){
             x=x<TankPanel.GAME_WIDTH-Tank.SIZE?x+speed:TankPanel.GAME_WIDTH-Tank.SIZE;
         }
+        rect.x = x;
+        rect.y = y;
         if(Math.random()<0.02){
             int length = Direction.values().length;
             this.direction = Direction.values()[(int)(Math.random()*length)];
@@ -52,6 +58,6 @@ public class EnemyTank extends Tank{
     @Override
     void shoot(){
         Bullet b = Bullet.createBullet(x+Tank.SIZE/2-Bullet.SIZE/2,y+Tank.SIZE/2-Bullet.SIZE/2,direction, Group.ENEMY);
-        TankPanel.bullets.add(b);
+        TankPanel.getInstance().add(b);
     }
 }

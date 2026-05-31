@@ -1,8 +1,10 @@
 package com.tuanfans.tank;
 
 
+import com.tuanfans.AbstractGameObject;
 import com.tuanfans.Direction;
 import com.tuanfans.Group;
+import com.tuanfans.Moveable;
 import com.tuanfans.bullet.Bullet;
 import com.tuanfans.explode.Explode;
 import com.tuanfans.view.TankPanel;
@@ -16,42 +18,72 @@ import java.util.ArrayList;
  * @author TuanFans
  * @date 2026/5/29
  */
-public abstract class Tank {
+public abstract class Tank extends AbstractGameObject implements Moveable {
     int x,y,speed;
+    int oldX,oldY;
     public static final int SIZE = 40;
     Image image;
     Direction direction;
     Group group;
-    boolean live = true;
+    Rectangle2D.Double rect;
+
+    public void setXY(int x,int y){
+        this.setX(x);
+        this.setY(y);
+    }
+
+    public void back(){
+        this.setX(oldX);
+        this.setY(oldY);
+    }
 
     public int getX(){
         return x;
+    }
+
+    public void setX(int x){
+        this.x = x;
     }
 
     public int getY(){
         return y;
     }
 
+    public void setY(int y){
+        this.y = y;
+    }
+
+    public int getOldX(){
+        return oldX;
+    }
+
+    public int getOldY(){
+        return oldY;
+    }
+
     public Group getGroup(){
         return group;
-    }
-
-    public boolean isLive(){
-        return live;
-    }
-
-    public void setLive(boolean live){
-        this.live = live;
     }
 
     public Direction getDirection(){
         return direction;
     }
 
+    public Rectangle2D.Double getRect(){
+        return rect;
+    }
+
+    @Override
     public abstract void move();
 
     abstract void shoot();
+
+    @Override
     public void draw(Graphics2D g2){
+        if(!this.isLive()) {
+            TankPanel.getInstance().remove(this);
+            return;
+        }
         // 创建副本：创建副本，避免对原始对象进行修改
         Graphics2D g2d = (Graphics2D) g2.create();
         switch(direction){
@@ -92,6 +124,6 @@ public abstract class Tank {
     }
 
     public void explode(){
-        TankPanel.explodes.add(new Explode(x+SIZE/2-Explode.SIZE/2,y+SIZE/2-Explode.SIZE/2));
+        TankPanel.getInstance().add(new Explode(x+SIZE/2-Explode.SIZE/2,y+SIZE/2-Explode.SIZE/2));
     }
 }

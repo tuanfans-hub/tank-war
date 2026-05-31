@@ -15,7 +15,7 @@ public class Main {
         window.setResizable(false);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        TankPanel tp = new TankPanel();
+        TankPanel tp = TankPanel.getInstance();
         window.add(tp);
         window.pack();
 

@@ -17,7 +17,7 @@ public class FourDirShootStrategy implements ShootStrategy{
         Direction[] dirs = Direction.values();
         for(Direction dir:dirs){
             Bullet b = Bullet.createBullet(pt.getX()+ Tank.SIZE/2-Bullet.SIZE/2,pt.getY()+Tank.SIZE/2-Bullet.SIZE/2,dir, Group.PLAYER);
-            TankPanel.bullets.add(b);
+            TankPanel.getInstance().add(b);
         }
     }
 }

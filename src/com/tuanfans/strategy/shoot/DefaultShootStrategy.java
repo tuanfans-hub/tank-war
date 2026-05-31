@@ -14,6 +14,6 @@ public class DefaultShootStrategy implements ShootStrategy{
     @Override
     public void shoot(PlayerTank pt) {
         Bullet b = Bullet.createBullet(pt.getX()+ Tank.SIZE/2-Bullet.SIZE/2,pt.getY()+Tank.SIZE/2-Bullet.SIZE/2,pt.getDirection(), Group.PLAYER);
-        TankPanel.bullets.add(b);
+        TankPanel.getInstance().add(b);
     }
 }
