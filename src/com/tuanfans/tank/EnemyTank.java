@@ -1,6 +1,7 @@
 package com.tuanfans.tank;
 
 import com.tuanfans.Direction;
+import com.tuanfans.GameModel;
 import com.tuanfans.Group;
 import com.tuanfans.bullet.Bullet;
 import com.tuanfans.view.TankPanel;
@@ -15,7 +16,7 @@ import java.util.Objects;
  */
 public class EnemyTank extends Tank{
     private EnemyTank(){
-        this.speed = (int)(Math.random()*TankPanel.gameLevel.getFactor()+TankPanel.gameLevel.getBaseSpeed());
+        this.speed = (int)(Math.random()* GameModel.gameLevel.getFactor()+GameModel.gameLevel.getBaseSpeed());
         this.x = (int)(Math.random()*(TankPanel.GAME_WIDTH-SIZE));
         this.y = (int)(Math.random()*(TankPanel.GAME_HEIGHT-SIZE));
         this.direction = Direction.values()[(int)(Math.random()*4)];
@@ -50,7 +51,7 @@ public class EnemyTank extends Tank{
             int length = Direction.values().length;
             this.direction = Direction.values()[(int)(Math.random()*length)];
         }
-        if(Math.random()>=1-TankPanel.gameLevel.getShootRate()){
+        if(Math.random()>=1-GameModel.gameLevel.getShootRate()){
             shoot();
         }
     }
@@ -58,6 +59,6 @@ public class EnemyTank extends Tank{
     @Override
     void shoot(){
         Bullet b = Bullet.createBullet(x+Tank.SIZE/2-Bullet.SIZE/2,y+Tank.SIZE/2-Bullet.SIZE/2,direction, Group.ENEMY);
-        TankPanel.getInstance().add(b);
+        GameModel.getInstance().add(b);
     }
 }

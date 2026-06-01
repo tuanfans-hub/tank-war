@@ -4,8 +4,6 @@ package com.tuanfans.tank;
 import com.tuanfans.ConfigManager;
 import com.tuanfans.Direction;
 import com.tuanfans.Group;
-import com.tuanfans.bullet.Bullet;
-import com.tuanfans.strategy.shoot.DefaultShootStrategy;
 import com.tuanfans.strategy.shoot.ShootStrategy;
 import com.tuanfans.view.TankPanel;
 

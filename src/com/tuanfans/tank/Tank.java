@@ -1,10 +1,7 @@
 package com.tuanfans.tank;
 
 
-import com.tuanfans.AbstractGameObject;
-import com.tuanfans.Direction;
-import com.tuanfans.Group;
-import com.tuanfans.Moveable;
+import com.tuanfans.*;
 import com.tuanfans.bullet.Bullet;
 import com.tuanfans.explode.Explode;
 import com.tuanfans.view.TankPanel;
@@ -81,7 +78,7 @@ public abstract class Tank extends AbstractGameObject implements Moveable {
     @Override
     public void draw(Graphics2D g2){
         if(!this.isLive()) {
-            TankPanel.getInstance().remove(this);
+            GameModel.getInstance().remove(this);
             return;
         }
         // 创建副本：创建副本，避免对原始对象进行修改
@@ -124,6 +121,6 @@ public abstract class Tank extends AbstractGameObject implements Moveable {
     }
 
     public void explode(){
-        TankPanel.getInstance().add(new Explode(x+SIZE/2-Explode.SIZE/2,y+SIZE/2-Explode.SIZE/2));
+        GameModel.getInstance().add(new Explode(x+SIZE/2-Explode.SIZE/2,y+SIZE/2-Explode.SIZE/2));
     }
 }

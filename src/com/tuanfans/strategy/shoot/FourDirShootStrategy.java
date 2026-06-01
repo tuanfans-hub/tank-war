@@ -1,6 +1,7 @@
 package com.tuanfans.strategy.shoot;
 
 import com.tuanfans.Direction;
+import com.tuanfans.GameModel;
 import com.tuanfans.Group;
 import com.tuanfans.bullet.Bullet;
 import com.tuanfans.tank.PlayerTank;
@@ -17,7 +18,7 @@ public class FourDirShootStrategy implements ShootStrategy{
         Direction[] dirs = Direction.values();
         for(Direction dir:dirs){
             Bullet b = Bullet.createBullet(pt.getX()+ Tank.SIZE/2-Bullet.SIZE/2,pt.getY()+Tank.SIZE/2-Bullet.SIZE/2,dir, Group.PLAYER);
-            TankPanel.getInstance().add(b);
+            GameModel.getInstance().add(b);
         }
     }
 }

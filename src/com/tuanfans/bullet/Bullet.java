@@ -1,9 +1,6 @@
 package com.tuanfans.bullet;
 
-import com.tuanfans.AbstractGameObject;
-import com.tuanfans.Direction;
-import com.tuanfans.Group;
-import com.tuanfans.Moveable;
+import com.tuanfans.*;
 import com.tuanfans.tank.Tank;
 import com.tuanfans.view.TankPanel;
 
@@ -89,7 +86,7 @@ public class Bullet extends AbstractGameObject implements Moveable {
     @Override
     public void draw(Graphics2D g2){
         if(!this.isLive()) {
-            TankPanel.getInstance().remove(this);
+            GameModel.getInstance().remove(this);
             return;
         }
         // 创建副本：创建副本，避免对原始对象进行修改

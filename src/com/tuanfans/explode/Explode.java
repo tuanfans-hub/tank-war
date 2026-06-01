@@ -1,6 +1,7 @@
 package com.tuanfans.explode;
 
 import com.tuanfans.AbstractGameObject;
+import com.tuanfans.GameModel;
 import com.tuanfans.view.TankPanel;
 
 import javax.swing.*;
@@ -32,7 +33,7 @@ public class Explode extends AbstractGameObject {
     @Override
     public void draw(Graphics2D g2){
         if(!this.isLive()) {
-            TankPanel.getInstance().remove(this);
+            GameModel.getInstance().remove(this);
             return;
         }
         Graphics2D g2d = (Graphics2D) g2.create();
